@@ -17,7 +17,9 @@ Este proyecto documenta e implementa una arquitectura de seguridad perimetral e 
 ## 📐 2. Arquitectura y Esquema de Direccionamiento
 
 ### Topología General
-![Topología GNS3](images/topologia.png)
+
+<img width="543" height="431" alt="Captura de pantalla 2026-09-25 205411" src="https://github.com/user-attachments/assets/fbd804ea-1aaf-40fc-a9e8-e6f80748f613" />
+
 
 ### Tabla de Subredes e Interfaces
 | Dispositivo / Zona | Interfaz / VLAN | Dirección IP / Subred | Función / Descripción |
@@ -59,7 +61,8 @@ Se configuró un perfil IPS denominado `IPS_SQLi_Quarantine` aplicando inspecci�
 - **Mecanismo de respuesta:** `Attacker IP Quarantine`
 - **Tiempo de expiración:** 300 segundos (5 minutos).
 
-![Perfil IPS](images/ips_profile.png)
+<img width="788" height="623" alt="Captura de pantalla 2026-09-25 222831" src="https://github.com/user-attachments/assets/e609987c-f826-48be-b319-c1af8543fed1" />
+
 
 ---
 
