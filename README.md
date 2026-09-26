@@ -1,3 +1,5 @@
+https://youtu.be/QQkzK84si5U
+
 # fortigate-security-lab-0791
 lab de seguridad de fortigate
 # Laboratorio de Seguridad FortiGate: Segmentación, IPS/DPI y Aislamiento de Servidores
@@ -34,23 +36,30 @@ Este proyecto documenta e implementa una arquitectura de seguridad perimetral e 
 
 ##  3. Políticas de Seguridad Implementadas
 
-1. **Permitir Acceso Web (Users $\rightarrow$ Web-Server):**
-   - **Origen:** `10.25.79.128/25` (`VLAN10_Users`)
-   - **Destino:** `10.25.79.2/32` (`Web-Server`)
-   - **Servicios:** HTTP, HTTPS, PING
-   - **NAT:** Desactivado (mantiene visibilidad de la IP real del cliente)
-   - **Seguridad:** Perfil IPS con Cuarentena y SSL Deep Inspection activado.
+### 3.1. Reglas de Control de Acceso (Firewall Policies)
+* **Política 1 (`Allow-Users-to-WEB`):** Controla el tráfico saliente desde los hosts de la subred `10.25.79.128/25` (`VLAN10_Users`) hacia el servidor web (`10.25.79.2/32`). Se restringe el tráfico a los servicios seguros `HTTPS` (puerto 443) y `HTTP` (puerto 80). En esta regla se mantiene el campo NAT deshabilitado para preservar la visibilidad de la dirección IP de origen en los logs de seguridad.
+* **Política 2 (`Block-Users-to-DB`):** Implementa un bloqueo explícito (`DENY`) para cualquier intento de conexión directa originado desde la VLAN de usuarios hacia el servidor de base de datos (`10.25.79.3/32`) en el puerto estándar MySQL (`3306`), garantizando el aislamiento de la capa de datos.
+* **Política 3 (`WEB-to-DB-MySQL-Only`):** Aplica el principio de mínimo privilegio permitiendo la comunicación bidireccional únicamente entre la interfaz del `Web-Server` y el `DB-Server` sobre el puerto `3306`, denegando cualquier otro tipo de tráfico no esencial.
 
-2. **Aislamiento Directo a Base de Datos (Users $\rightarrow$ DB-Server):**
-   - **Origen:** `10.25.79.128/25`
-   - **Destino:** `10.25.79.3/32` (`DB-Server`)
-   - **Acción:** `DENY` (Bloqueo explícito del acceso directo desde clientes).
+### 3.2. Asignación Dinámica de Direccionamiento (DHCP Server)
+Se configuró el servicio **DHCP Server** directamente sobre la subinterfaz `VLAN10_Users` (`port3.10`) desde el apartado *Network -> Interfaces*:
+* **Rango de Direcciones:** `10.25.79.130` - `10.25.79.254`
+* **Máscara de Subred:** `255.255.255.128` (/25)
+* **Puerta de Enlace (Gateway):** `10.25.79.129`
 
-3. **Acceso Aplicativo Interno (Web-Server $\rightarrow$ DB-Server):**
-   - **Origen:** `10.25.79.2/32`
-   - **Destino:** `10.25.79.3/32`
-   - **Servicio:** MySQL (`3306`)
-   - **Acción:** `ACCEPT`.
+### 3.3. Inspección Profunda (DPI), IPS y Mecanismo de Cuarentena
+* **Deep Packet Inspection (DPI):** Se asoció el perfil `deep-inspection` a la regla de tráfico web para permitir al motor FortiGuard desencriptar los paquetes SSL/TLS e inspeccionar la carga útil (*payload*) del tráfico cifrado en el puerto 443.
+* **Prevención de Intrusiones (IPS):** Se definió el perfil `IPS_SQLi_Quarantine` enfocado en firmas de inyección SQL (`Category: SQL.Injection`). Ante la detección de coincidencias, la acción configurada establece el bloqueo inmediato de la sesión (`Block`) y la adición del host emisor a la lista de aislamiento mediante **Attacker IP Quarantine** con un tiempo de expiración automático de 300 segundos (5 minutos).
+
+### 3.4. Filtrado de Aplicaciones y Control de Archivos (File Filter / Web Filter)
+Para prevenir la descarga no autorizada de software ejecutable y mitigar la entrada de vectores maliciosos a la red interna, se configuró un perfil de **File Filter / Web Filter** adjunto a la política de navegación:
+* **Criterio de Bloqueo:** Detección de encabezados y extensiones de archivo de tipo ejecutable binario (`.exe`).
+* **Acción:** Interrupción de la transferencia de archivos en tiempo real y despliegue de página de advertencia (*Block Page*) al usuario.
+
+### 3.5. Protección DoS y Limitación de Tasa (IPv4 DoS Policy & Rate Limiting)
+Con el objetivo de salvaguardar los recursos del firewall y la disponibilidad del servidor web frente a ataques de denegación de servicio distribuido o de inundación, se creó una regla en el módulo **Policy & Objects -> IPv4 DoS Policy** sobre la interfaz `VLAN10_Users`:
+* **Firmas Monitoreadas:** Anomalías L4 referentes a inundación TCP (`tcp_flood`) e inundación ICMP (`icmp_flood`).
+* **Umbral y Mitigación:** Se fijó un límite máximo de peticiones por segundo (*Rate Limiting*). Al rebasar dicho umbral, el sistema activa la acción `Block`, descartando el tráfico excedente en capa de red antes de impactar el procesamiento de las políticas principales.
 
 ---
 
@@ -66,7 +75,7 @@ Se configuró un perfil IPS denominado `IPS_SQLi_Quarantine` aplicando inspecci�
 
 ---
 
-##  5. Batería de Pruebas y Resultados
+##  5. Resultados
 
 ### Prueba A: Acceso Web Permitido
 - **Comando desde `Cliente-User`:**
