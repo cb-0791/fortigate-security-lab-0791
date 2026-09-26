@@ -9,12 +9,12 @@ lab de seguridad de fortigate
 
 ---
 
-## 📌 1. Resumen del Proyecto
+##  1. Resumen del Proyecto
 Este proyecto documenta e implementa una arquitectura de seguridad perimetral e interna utilizando un Firewall FortiGate (FortiOS) virtualizado en GNS3. Se establece la segmentación por VLANs (VLAN 10 para usuarios), control de acceso entre zonas mediante políticas estrictas sin NAT, inspección profunda de tráfico (DPI), prevención de intrusiones (IPS) con cuarentena automática ante ataques de inyección SQL (SQLi) y el aislamiento de bases de datos.
 
 ---
 
-## 📐 2. Arquitectura y Esquema de Direccionamiento
+##  2. Arquitectura y Esquema de Direccionamiento
 
 ### Topología General
 
@@ -32,7 +32,7 @@ Este proyecto documenta e implementa una arquitectura de seguridad perimetral e 
 
 ---
 
-## 🔒 3. Políticas de Seguridad Implementadas
+##  3. Políticas de Seguridad Implementadas
 
 1. **Permitir Acceso Web (Users $\rightarrow$ Web-Server):**
    - **Origen:** `10.25.79.128/25` (`VLAN10_Users`)
@@ -54,7 +54,7 @@ Este proyecto documenta e implementa una arquitectura de seguridad perimetral e 
 
 ---
 
-## 🛡️ 4. Configuración del Perfil IPS y Cuarentena
+##  4. Configuración del Perfil IPS y Cuarentena
 
 Se configuró un perfil IPS denominado `IPS_SQLi_Quarantine` aplicando inspección a firmas de SQL Injection:
 - **Acción ante coincidencia:** `Block`
@@ -66,7 +66,7 @@ Se configuró un perfil IPS denominado `IPS_SQLi_Quarantine` aplicando inspecci�
 
 ---
 
-## 🧪 5. Batería de Pruebas y Resultados
+##  5. Batería de Pruebas y Resultados
 
 ### Prueba A: Acceso Web Permitido
 - **Comando desde `Cliente-User`:**
@@ -96,27 +96,3 @@ Comando desde Web-Server:
 curl -v telnet://10.25.79.3:3306
 Resultado: Connected to 10.25.79.3 (Conexión exitosa al servicio de base de datos desde la capa de aplicación).
 
-📦 6. Archivos Adjuntos
-Backup de Configuración de FortiGate: 
-
-
-
----
-
-### 5. Archivo de Entrega `.txt`
-
-Recuerda crear el archivo `CondorBautista_20250791_P1.txt` para subir a la plataforma institucional con este texto básico:
-
-```text
-Nombre: Cóndor Bautista
-Matrícula: 2025-0791
-Materia: Seguridad en Redes
-
-Enlace al Repositorio de GitHub:
-https://github.com/TU_USUARIO/fortigate-security-lab-0791
-
-Enlace al Video Demostrativo en YouTube:
-https://youtu.be/TU_CODIGO_DE_VIDEO
-
-
-  
